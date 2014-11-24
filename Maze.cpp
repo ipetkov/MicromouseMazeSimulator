@@ -1,17 +1,15 @@
+#include <iostream>
 #include "Maze.h"
 
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(*a))
 
-Maze::Maze(MazeDefinitions::MazeEncodingName name, unsigned startX, unsigned startY) {
+Maze::Maze(MazeDefinitions::MazeEncodingName name, PathFinder *pathFinder)
+: mouseX(0), mouseY(0), heading(NORTH), pathFinder(pathFinder) {
     if(name >= MazeDefinitions::MazeEncodingName::MAZE_NAME_MAX) {
         name = MazeDefinitions::MazeEncodingName::MAZE_CAMM_2012;
     }
 
     const unsigned mazeIndex = ((unsigned)name < ARRAY_SIZE(MazeDefinitions::mazes)) ? (unsigned)name : 0;
-
-    mouseX = startX;
-    mouseY = startY;
-    heading = Dir::NORTH;
 
     wallNS.clearAll();
     wallEW.clearAll();
@@ -78,26 +76,6 @@ void Maze::setOpen(unsigned x, unsigned y, Dir d) {
     }
 }
 
-inline bool Maze::wallInFront() const {
-    return !isOpen(mouseX, mouseY, heading);
-}
-
-inline bool Maze::wallOnLeft() const {
-    return !isOpen(mouseX, mouseY, counterClockwise(heading));
-}
-
-inline bool Maze::wallOnRight() const {
-    return !isOpen(mouseX, mouseY, clockwise(heading));
-}
-
-inline void Maze::turnClockwise() {
-    heading = clockwise(heading);
-}
-
-inline void Maze::turnCounterClockwise() {
-    heading = counterClockwise(heading);
-}
-
 void Maze::moveForward() {
     if(! isOpen(mouseX, mouseY, heading)) {
         throw "Mouse crashed!";
@@ -129,7 +107,42 @@ void Maze::moveBackward() {
     heading = oldHeading;
 }
 
-std::string Maze::draw(const size_t infoLen, cellInfoCallback cb) const {
+void Maze::start() {
+    MouseMovement nextMovement;
+
+    if(!pathFinder) {
+        return;
+    }
+
+    while(Finish != (nextMovement = pathFinder->nextMovement(mouseX, mouseY, *this))) {
+        try {
+            switch(nextMovement) {
+                case MoveForward:
+                    moveForward();
+                    break;
+                case MoveBackward:
+                    moveBackward();
+                    break;
+                case TurnClockwise:
+                    turnClockwise();
+                    break;
+                case TurnCounterClockwise:
+                    turnCounterClockwise();
+                    break;
+                case TurnAround:
+                    turnAround();
+                    break;
+                case Finish:
+                default:
+                    return;
+            }
+        } catch (std::string str) {
+            std::cerr << str << std::endl;
+        }
+    }
+}
+
+std::string Maze::draw(const size_t infoLen) const {
     std::string out("");
     std::string upDown, leftRight;
 
@@ -148,8 +161,8 @@ std::string Maze::draw(const size_t infoLen, cellInfoCallback cb) const {
         for(int x = 0; x < MazeDefinitions::MAZE_LEN; x++) {
             std::string cellInfo;
 
-            if(cb) {
-                cellInfo = cb(x, y, infoLen).substr(0, infoLen);
+            if(pathFinder) {
+                cellInfo = pathFinder->getInfo(x, y, infoLen).substr(0, infoLen);
             }
 
             if("" == cellInfo) {
