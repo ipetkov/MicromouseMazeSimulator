@@ -1,4 +1,6 @@
 #include <iostream>
+#include <unistd.h> // getopt
+
 #include "Maze.h"
 #include "MazeDefinitions.h"
 #include "PathFinder.h"
@@ -10,28 +12,20 @@
  * Micromouse mazes are designed for such algorithms to fail.
  */
 class LeftWallFollower : public PathFinder {
-    // Helps us determine that we should go forward if we have just turned left.
-    bool shouldGoForward = false;
-
-    // Helps us determine if we've made a loop around the maze without finding the center.
-    bool visitedStart = false;
-
-    bool isAtCenter(unsigned x, unsigned y) const {
-        unsigned midpoint = MazeDefinitions::MAZE_LEN / 2;
-
-        if(MazeDefinitions::MAZE_LEN % 2 != 0) {
-            return x == midpoint && y == midpoint;
-        }
-
-        return  (x == midpoint     && y == midpoint    ) ||
-                (x == midpoint - 1 && y == midpoint    ) ||
-                (x == midpoint     && y == midpoint - 1) ||
-                (x == midpoint - 1 && y == midpoint - 1);
-    }
+public:
+    LeftWallFollower(bool shouldPause = false) : pause(shouldPause) {}
 
     MouseMovement nextMovement(unsigned x, unsigned y, const Maze &maze) {
         const bool frontWall = maze.wallInFront();
         const bool leftWall  = maze.wallOnLeft();
+
+        // Pause at each cell if the user requests it.
+        // It allows for better viewing on command line.
+        if(pause) {
+            std::cout << "Hit enter to continue..." << std::endl;
+            std::cin.ignore(10000, '\n');
+            std::cin.clear();
+        }
 
         std::cout << maze.draw() << std::endl << std::endl;
 
@@ -80,11 +74,65 @@ class LeftWallFollower : public PathFinder {
         // If we get stuck somehow, just terminate.
         return Finish;
     }
+
+protected:
+    // Helps us determine that we should go forward if we have just turned left.
+    bool shouldGoForward = false;
+
+    // Helps us determine if we've made a loop around the maze without finding the center.
+    bool visitedStart = false;
+
+    // Indicates we should pause before moving to next cell.
+    // Useful for command line usage.
+    bool pause = false;
+
+
+    bool isAtCenter(unsigned x, unsigned y) const {
+        unsigned midpoint = MazeDefinitions::MAZE_LEN / 2;
+
+        if(MazeDefinitions::MAZE_LEN % 2 != 0) {
+            return x == midpoint && y == midpoint;
+        }
+
+        return  (x == midpoint     && y == midpoint    ) ||
+        (x == midpoint - 1 && y == midpoint    ) ||
+        (x == midpoint     && y == midpoint - 1) ||
+        (x == midpoint - 1 && y == midpoint - 1);
+    }
 };
 
-int main(int argc, const char * argv[]) {
-    LeftWallFollower leftWallFollower;
-    Maze maze(MazeDefinitions::MAZE_CAMM_2012, &leftWallFollower);
+int main(int argc, char * argv[]) {
+    MazeDefinitions::MazeEncodingName mazeName = MazeDefinitions::MAZE_CAMM_2012;
+    bool pause = false;
+
+    int opt;
+    opterr = 0;
+
+    while((opt = getopt(argc, argv, "m:ph")) != -1) {
+        switch(opt) {
+            case 'm': {
+                int mazeOption = atoi(optarg);
+                if(mazeOption < MazeDefinitions::MAZE_NAME_MAX && mazeOption > 0) {
+                    mazeName = (MazeDefinitions::MazeEncodingName)mazeOption;
+                }
+                break;
+            }
+
+            case 'p':
+                pause = true;
+                break;
+
+            case 'h':
+            default:
+                std::cout << "Usage: " << argv[0] << " [-m N] [-p]" << std::endl;
+                std::cout << "\t-m N will load the maze corresponding to N, or 0 if invalid N or missing option" << std::endl;
+                std::cout << "\t-p will wait for a newline in between cell traversals" << std::endl;
+                return -1;
+        }
+    }
+
+    LeftWallFollower leftWallFollower(pause);
+    Maze maze(mazeName, &leftWallFollower);
     std::cout << maze.draw() << std::endl << std::endl;
 
     maze.start();
