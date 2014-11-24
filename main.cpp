@@ -32,6 +32,7 @@ public:
         // If we somehow miraculously hit the center
         // of the maze, just terminate and celebrate!
         if(isAtCenter(x, y)) {
+            std::cout << "Found center! Good enough for the demo, won't try to get back." << std::endl;
             return Finish;
         }
 
@@ -39,6 +40,7 @@ public:
         // we couldn't find the center and never will...
         if(x == 0 && y == 0) {
             if(visitedStart) {
+                std::cout << "Unable to find center, giving up." << std::endl;
                 return Finish;
             } else {
                 visitedStart = true;
@@ -72,6 +74,7 @@ public:
         }
 
         // If we get stuck somehow, just terminate.
+        std::cout << "Got stuck..." << std::endl;
         return Finish;
     }
 
@@ -136,5 +139,4 @@ int main(int argc, char * argv[]) {
     std::cout << maze.draw() << std::endl << std::endl;
 
     maze.start();
-    std::cout << maze.draw() << std::endl << std::endl;
 }
