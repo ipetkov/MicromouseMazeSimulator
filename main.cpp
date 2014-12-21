@@ -1,5 +1,4 @@
 #include <iostream>
-#include <unistd.h> // getopt
 #include <cstdlib>  // atoi
 
 #include "Maze.h"
@@ -31,7 +30,7 @@ public:
             std::cin.clear();
         }
 
-        std::cout << maze.draw() << std::endl << std::endl;
+        std::cout << maze.draw(5) << std::endl << std::endl;
 
         // If we somehow miraculously hit the center
         // of the maze, just terminate and celebrate!
@@ -111,35 +110,29 @@ int main(int argc, char * argv[]) {
     MazeDefinitions::MazeEncodingName mazeName = MazeDefinitions::MAZE_CAMM_2012;
     bool pause = false;
 
-    int opt;
-    opterr = 0;
+    // Since Windows does not support getopt directly, we will
+    // have to parse the command line arguments ourselves.
 
-    while((opt = getopt(argc, argv, "m:ph")) != -1) {
-        switch(opt) {
-            case 'm': {
-                int mazeOption = atoi(optarg);
-                if(mazeOption < MazeDefinitions::MAZE_NAME_MAX && mazeOption > 0) {
+    // Skip the program name, start with argument index 1
+    for(int i = 1; i < argc; i++) {
+        if(strcmp(argv[i], "-m") == 0 && i+1 < argc) {
+            int mazeOption = atoi(argv[++i]);
+            if(mazeOption < MazeDefinitions::MAZE_NAME_MAX && mazeOption > 0) {
                     mazeName = (MazeDefinitions::MazeEncodingName)mazeOption;
-                }
-                break;
             }
-
-            case 'p':
-                pause = true;
-                break;
-
-            case 'h':
-            default:
-                std::cout << "Usage: " << argv[0] << " [-m N] [-p]" << std::endl;
-                std::cout << "\t-m N will load the maze corresponding to N, or 0 if invalid N or missing option" << std::endl;
-                std::cout << "\t-p will wait for a newline in between cell traversals" << std::endl;
-                return -1;
+        } else if(strcmp(argv[i], "-p") == 0) {
+            pause = true;
+        } else {
+            std::cout << "Usage: " << argv[0] << " [-m N] [-p]" << std::endl;
+            std::cout << "\t-m N will load the maze corresponding to N, or 0 if invalid N or missing option" << std::endl;
+            std::cout << "\t-p will wait for a newline in between cell traversals" << std::endl;
+            return -1;
         }
     }
 
     LeftWallFollower leftWallFollower(pause);
     Maze maze(mazeName, &leftWallFollower);
-    std::cout << maze.draw() << std::endl << std::endl;
+    std::cout << maze.draw(5) << std::endl << std::endl;
 
     maze.start();
 }
