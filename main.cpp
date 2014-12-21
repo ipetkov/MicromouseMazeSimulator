@@ -1,5 +1,6 @@
 #include <iostream>
 #include <unistd.h> // getopt
+#include <cstdlib>  // atoi
 
 #include "Maze.h"
 #include "MazeDefinitions.h"
@@ -13,7 +14,10 @@
  */
 class LeftWallFollower : public PathFinder {
 public:
-    LeftWallFollower(bool shouldPause = false) : pause(shouldPause) {}
+    LeftWallFollower(bool shouldPause = false) : pause(shouldPause) {
+        shouldGoForward = false;
+        visitedStart = false;
+    }
 
     MouseMovement nextMovement(unsigned x, unsigned y, const Maze &maze) {
         const bool frontWall = maze.wallInFront();
@@ -80,15 +84,14 @@ public:
 
 protected:
     // Helps us determine that we should go forward if we have just turned left.
-    bool shouldGoForward = false;
+    bool shouldGoForward;
 
     // Helps us determine if we've made a loop around the maze without finding the center.
-    bool visitedStart = false;
+    bool visitedStart;
 
     // Indicates we should pause before moving to next cell.
     // Useful for command line usage.
-    bool pause = false;
-
+    const bool pause;
 
     bool isAtCenter(unsigned x, unsigned y) const {
         unsigned midpoint = MazeDefinitions::MAZE_LEN / 2;

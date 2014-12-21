@@ -12,10 +12,10 @@ class Maze {
 protected:
     BitVector256 wallNS;
     BitVector256 wallEW;
-    Dir heading = NORTH;
+    Dir heading;
     PathFinder *pathFinder;
-    unsigned mouseX = 0;
-    unsigned mouseY = 0;
+    unsigned mouseX;
+    unsigned mouseY;
 
     bool isOpen(unsigned x, unsigned y, Dir d) const;
     void setOpen(unsigned x, unsigned y, Dir d);

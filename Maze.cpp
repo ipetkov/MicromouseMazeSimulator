@@ -4,9 +4,9 @@
 #define ARRAY_SIZE(a) (sizeof(a)/sizeof(*a))
 
 Maze::Maze(MazeDefinitions::MazeEncodingName name, PathFinder *pathFinder)
-: mouseX(0), mouseY(0), heading(NORTH), pathFinder(pathFinder) {
-    if(name >= MazeDefinitions::MazeEncodingName::MAZE_NAME_MAX) {
-        name = MazeDefinitions::MazeEncodingName::MAZE_CAMM_2012;
+: heading(NORTH), pathFinder(pathFinder), mouseX(0), mouseY(0) {
+    if(name >= MazeDefinitions::MAZE_NAME_MAX) {
+        name = MazeDefinitions::MAZE_CAMM_2012;
     }
 
     const unsigned mazeIndex = ((unsigned)name < ARRAY_SIZE(MazeDefinitions::mazes)) ? (unsigned)name : 0;
@@ -21,8 +21,8 @@ Maze::Maze(MazeDefinitions::MazeEncodingName name, PathFinder *pathFinder)
     const unsigned eastMask  = 1 << 1;
     const unsigned northMask = 1 << 0;
 
-    for(int col = 0; col < MazeDefinitions::MAZE_LEN; col++) {
-        for(int row = 0; row < MazeDefinitions::MAZE_LEN; row++) {
+    for(unsigned col = 0; col < MazeDefinitions::MAZE_LEN; col++) {
+        for(unsigned row = 0; row < MazeDefinitions::MAZE_LEN; row++) {
             const unsigned char cell = MazeDefinitions::mazes[mazeIndex][col][row];
 
             if((cell & northMask) == 0 && row != MazeDefinitions::MAZE_LEN) {
@@ -153,12 +153,14 @@ std::string Maze::draw(const size_t infoLen) const {
     const std::string horizWall = std::string("").append(cellWidth, '-');
     const std::string horizWallEmpty = std::string("").append(cellWidth, ' ');
 
-    for(int y = MazeDefinitions::MAZE_LEN-1; y >= 0; y--) {
+    for(unsigned row = 0; row < MazeDefinitions::MAZE_LEN; row++) {
+        const unsigned y = MazeDefinitions::MAZE_LEN - row - 1;
+
         upDown = dot;
         leftRight = "";
 
         // Draw most of the maze
-        for(int x = 0; x < MazeDefinitions::MAZE_LEN; x++) {
+        for(unsigned x = 0; x < MazeDefinitions::MAZE_LEN; x++) {
             std::string cellInfo;
 
             if(pathFinder) {
@@ -208,7 +210,7 @@ std::string Maze::draw(const size_t infoLen) const {
 
     // Draw out the bottom most row
     out += dot;
-    for(int x = 0; x < MazeDefinitions::MAZE_LEN; x++) {
+    for(unsigned x = 0; x < MazeDefinitions::MAZE_LEN; x++) {
         out += isOpen(x, 0, SOUTH) ? horizWallEmpty : horizWall;
         out += dot;
     }

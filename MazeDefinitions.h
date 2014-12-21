@@ -25,7 +25,7 @@ namespace MazeDefinitions {
      * with wall/no wall stored as WSEN in the least significant bits
      * Data is stored in column major order
      */
-    const unsigned char mazes[][MAZE_LEN][MAZE_LEN] {
+    static const unsigned char mazes[][MAZE_LEN][MAZE_LEN] = {
         // CAMM 2012
         {
             {14,10,10,10,8,9,14,8,10,8,10,10,8,11,13,13},

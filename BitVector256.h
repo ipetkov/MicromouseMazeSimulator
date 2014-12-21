@@ -12,17 +12,17 @@ public:
         clearAll();
     }
 
-    inline void set(int x, int y) {
+    inline void set(unsigned x, unsigned y) {
         if(x < VECTOR_SIZE && y < VECTOR_SIZE)
             vector[x] |= 1<<y;
     }
 
-    inline void clear(int x, int y) {
+    inline void clear(unsigned x, unsigned y) {
         if(x < VECTOR_SIZE && y < VECTOR_SIZE)
             vector[x] &= ~(1<<y);
     }
 
-    inline bool get(int x, int y) const {
+    inline bool get(unsigned x, unsigned y) const {
         if(x < VECTOR_SIZE && y < VECTOR_SIZE)
             return (vector[x] & 1<<y) != 0;
 
