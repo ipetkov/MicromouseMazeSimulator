@@ -16,7 +16,7 @@ namespace MazeDefinitions {
         MAZE_ALL_JAPAN_2009,
         MAZE_ALL_JAPAN_2008,
 
-        MAZE_NAME_MAX,
+        MAZE_NAME_MAX
     };
 
     /**

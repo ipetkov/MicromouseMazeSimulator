@@ -11,7 +11,7 @@ enum MouseMovement {
     TurnClockwise,
     TurnCounterClockwise,
     TurnAround,
-    Finish,
+    Finish
 };
 
 class PathFinder {
@@ -46,6 +46,9 @@ public:
      * @return string of info
      */
     virtual std::string getInfo(unsigned x, unsigned y, size_t maxInfoLen) {
+        (void)x;
+        (void)y;
+        (void)maxInfoLen;
         return "";
     }
 };
