@@ -132,6 +132,9 @@ void Maze::start() {
                 case TurnAround:
                     turnAround();
                     break;
+                case Wait:
+                    // Do nothing, try again
+                    break;
                 case Finish:
                 default:
                     return;

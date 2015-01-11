@@ -6,12 +6,13 @@
 class Maze;
 
 enum MouseMovement {
-    MoveForward,
-    MoveBackward,
-    TurnClockwise,
-    TurnCounterClockwise,
-    TurnAround,
-    Finish
+    MoveForward,            // Move in the direction mouse is facing
+    MoveBackward,           // Move opposite of the direction mouse is facing
+    TurnClockwise,          // Self explanatory
+    TurnCounterClockwise,   // Self explanatory
+    TurnAround,             // Face the opposite direction currently facing
+    Wait,                   // Do nothing this time, do some computation, then try again later
+    Finish                  // Mouse has achieved goals and is ending the simulation
 };
 
 class PathFinder {
